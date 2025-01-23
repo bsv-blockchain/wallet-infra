@@ -4,6 +4,28 @@ This repository serves as a reference implementation for building and deploying 
 
 Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), this implementation empowers developers with extensive customization options for authentication, monetization, and database management to name a few.
 
+## Table of Contents
+
+- [Deployment Options](#deployment-options)
+- [Key Features](#key-features)
+  - [Out-of-the-Box UTXO Management](#out-of-the-box-utxo-management)
+  - [Customizable Monetization](#customizable-monetization)
+  - [Mutual Authentication](#mutual-authentication)
+  - [Flexible Database Choice](#flexible-database-choice)
+  - [Extensible Codebase](#extensible-codebase)
+  - [Just Defaults—Feel-Free-to-Customize](#just-defaultsfeel-free-to-customize)
+- [Local Development Setup](#local-development-setup)
+  - [Requirements](#requirements)
+  - [Steps](#steps)
+- [Deploying to Google Cloud Run](#deploying-to-google-cloud-run)
+  - [Prerequisites](#prerequisites)
+  - [Prepare the Dockerfile](#prepare-the-dockerfile)
+  - [Deploy Manually with GCloud](#deploy-manually-with-gcloud)
+  - [CI/CD with GitHub Actions](#cicd-with-github-actions)
+- [Conclusion](#conclusion)
+- [License](#license)
+
+
 ## Deployment Options
 
 1. **Local Development** – using Docker Compose for quick local iteration.
@@ -11,26 +33,26 @@ Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), thi
 
 ## Key Features
 
-1. **Out-of-the-Box UTXO Management**  
+1. #### Out-of-the-Box UTXO Management
    - The server automatically handles all core wallet storage actions—storing transaction outputs (UTXOs), managing spent/unspent states, tracking labels, baskets, certificates, and more.
    - **Auto-migrations** on startup (via Knex).
 
-2. **Customizable Monetization**  
+2. #### Customizable Monetization  
    - By default, sets a `calculateRequestPrice` returning `0`, but you can easily **charge** clients in satoshis for each API call—either flat fees or **per-route** fees.
    - Using [`@bsv/payment-express-middleware`](https://github.com/bitcoin-sv/payment-express-middleware) in combination with the `monetize` flag, you can create a system that verifies micropayments on each request.
 
-3. **Mutual Authentication**  
+3. #### Mutual Authentication  
    - The server uses [`@bsv/auth-express-middleware`](https://github.com/bitcoin-sv/auth-express-middleware) to ensure that **both** the client and the server authenticate before a request is allowed through. 
    - This ensures that only authorized wallets can read or modify UTXO data.
 
-4. **Flexible Database Choice**  
+4. #### Flexible Database Choice  
    - MySQL is used in this example (`mysql2` driver, `knex` config), however, you can integrate **any** DB driver that [Knex](https://knexjs.org/) supports—PostgreSQL, SQLite, etc. 
 
-5. **Extensible Codebase**  
+5. #### Extensible Codebase  
    - The `WalletStorageManager` class can handle multiple active or backup storage providers, letting you replicate or sync data across different backends.
    - The `StorageServer` class is an Express-based HTTP server that exposes a JSON-RPC endpoint. You can add your own routes, middlewares, or entire route controllers to further extend its functionality as needed for your [BRC-100](https://github.com/bitcoin-sv/BRCs/blob/master/wallet/0100.md) compliant wallet.
 
-6. **Just Defaults—Feel Free to Customize**  
+6. #### Just Defaults—Feel Free to Customize  
    - The code in `index.ts` is a basic example. Everything from `SERVER_PRIVATE_KEY`, `HTTP_PORT`, `KNEX_DB_CONNECTION`, to fee/commission handling can be **tweaked** in environment variables or replaced with your own logic.
 
 ---
