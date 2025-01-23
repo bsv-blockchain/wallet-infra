@@ -94,7 +94,10 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const serverOptions: WalletStorageServerOptions = {
       port: Number(HTTP_PORT),
       wallet,
-      monetize: false
+      monetize: false,
+      calculateRequestPrice: async () => {
+        return 0 // Monetize your server here! Price is in satoshis.
+      }
     }
     const server = new StorageServer(activeStorage, serverOptions)
 
