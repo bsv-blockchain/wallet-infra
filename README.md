@@ -143,7 +143,7 @@ CMD [ "node", "out/src/index.js"]
 
 **If you prefer** to skip Nginx in production, you can remove the `RUN apk add` and references to `nginx`. The code in `index.ts` spawns Nginx only if `NODE_ENV !== 'development'`.
 
-### 3.3 Deploy Manually with GCloud
+### Deploy Manually with GCloud
 
 1. **Build** your image:
    ```bash
