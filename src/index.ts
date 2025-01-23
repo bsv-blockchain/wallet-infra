@@ -20,8 +20,8 @@ dotenv.config()
 const {
   NODE_ENV = 'development',
   HTTP_PORT = 3998,
-  SERVER_PRIVATE_KEY = '1'.repeat(64),
-  KNEX_DB_CONNECTION = '{}'
+  SERVER_PRIVATE_KEY,
+  KNEX_DB_CONNECTION
 } = process.env
 
 async function setupWalletStorageAndMonitor(): Promise<{
@@ -37,6 +37,12 @@ async function setupWalletStorageAndMonitor(): Promise<{
   server: StorageServer
 }> {
   try {
+    if (!SERVER_PRIVATE_KEY) {
+      throw new Error('SERVER_PRIVATE_KEY must be set')
+    }
+    if (!KNEX_DB_CONNECTION) {
+      throw new Error('KNEX_DB_CONNECTION must be set')
+    }
     // Parse database connection details
     const connection = JSON.parse(KNEX_DB_CONNECTION)
     const databaseName = connection['database']
