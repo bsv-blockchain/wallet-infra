@@ -1,42 +1,54 @@
-# Wallet Infra (UTXO Management Infrastructure)
+# Wallet Infra - UTXO Management Server
 
-This repository **wallet-infra** contains the configurations and code necessary to **build and run a wallet storage server** (also referred to as an **“utxo-management-server”**). The server manages Bitcoin SV (BSV) UTXOs and can be connected to by BSV wallet clients. 
+This repository serves as a reference implementation for building and deploying BSV Wallet Infrastructure. It contains the configuration and code necessary to build and run a wallet storage server (also referred to as a “UTXO Management Server”). The server securely stores and manages UTXOs, providing a reliable backend for BSV wallet clients, all while never accessing user-held keys.
 
-Below you’ll find two primary deployment setups:
+Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), this implementation empowers developers with extensive customization options for authentication, monetization, and database management to name a few.
+
+## Deployment Options
 
 1. **Local Development** – using Docker Compose for quick local iteration.
 2. **Google Cloud Run** – for deploying a production-grade container that runs on Google Cloud’s serverless platform.
 
-This README explains how to get each environment running, including environment variables, Docker configuration, and the basic flow of your CI/CD if you choose to use GitHub Actions for automatic deployment.
+## Key Features
+
+1. **Out-of-the-Box UTXO Management**  
+   - The server automatically handles all core wallet storage actions—storing transaction outputs (UTXOs), managing spent/unspent states, tracking labels, baskets, certificates, and more.
+   - **Auto-migrations** on startup (via Knex).
+
+2. **Customizable Monetization**  
+   - By default, sets a `calculateRequestPrice` returning `0`, but you can easily **charge** clients in satoshis for each API call—either flat fees or **per-route** fees.
+   - Using [`@bsv/payment-express-middleware`](https://github.com/bitcoin-sv/payment-express-middleware) in combination with the `monetize` flag, you can create a system that verifies micropayments on each request.
+
+3. **Mutual Authentication**  
+   - The server uses [`@bsv/auth-express-middleware`](https://github.com/bitcoin-sv/auth-express-middleware) to ensure that **both** the client and the server authenticate before a request is allowed through. 
+   - This ensures that only authorized wallets can read or modify UTXO data.
+
+4. **Flexible Database Choice**  
+   - MySQL is used in this example (`mysql2` driver, `knex` config), however, you can integrate **any** DB driver that [Knex](https://knexjs.org/) supports—PostgreSQL, SQLite, etc. 
+
+5. **Extensible Codebase**  
+   - The `WalletStorageManager` class can handle multiple active or backup storage providers, letting you replicate or sync data across different backends.
+   - The `StorageServer` class is an Express-based HTTP server that exposes a JSON-RPC endpoint. You can add your own routes, middlewares, or entire route controllers to further extend its functionality as needed for your [BRC-100](https://github.com/bitcoin-sv/BRCs/blob/master/wallet/0100.md) compliant wallet.
+
+6. **Just Defaults—Feel Free to Customize**  
+   - The code in `index.ts` is a basic example. Everything from `SERVER_PRIVATE_KEY`, `HTTP_PORT`, `KNEX_DB_CONNECTION`, to fee/commission handling can be **tweaked** in environment variables or replaced with your own logic.
 
 ---
 
-## 1. Introduction to wallet-infra
+## Local Development Setup
 
-- **Objective**: Provide the **infrastructure** needed to spin up a remote UTXO management system. 
-- **Core**: The Node.js server (written in TypeScript) uses `wallet-storage` libraries to store and manage UTXOs in a MySQL database. 
-- **Features**:
-  - **Auto-run Migrations**: On startup, it runs DB migrations to ensure tables are in sync.
-  - **Server**: Exposes an HTTP endpoint on port `8080` by default (configurable via environment).
-  - **Commission / Fee**: (Optional) can configure a commission address or default fee model in environment variables.
-  - **Nginx**: Optionally included in the Docker image. For local dev or `NODE_ENV=development`, it is skipped.
-
----
-
-## 2. Local Development Setup
-
-Below are steps for **running everything locally** using **Docker Compose**: 
+Below are steps for **running locally** using **Docker Compose**: 
 this will spin up:
 1. A MySQL container
 2. The “utxo-management-server” container with Node.js
 
-### 2.1 Requirements
+### Requirements
 
 - **Docker** installed (v20+ recommended)
-- **Node.js** installed if you plan to run `npm install` locally (v16+ recommended)
+- **Node.js** installed if you plan to run `npm install` locally (v18+ recommended)
 - **Git** for code management (optional but typical)
 
-### 2.2 Steps
+### Steps
 
 1. **Clone this repository**:
    ```bash
@@ -95,18 +107,18 @@ That’s it for local development. Each time you change code, you can re-run `do
 
 ---
 
-## 3. Deploying to Google Cloud Run
+## Deploying to Google Cloud Run
 
 For **production** or cloud usage, we recommend deploying the Docker container to **Google Cloud Run**. Below is a high-level overview.
 
-### 3.1 Prerequisites
+### Prerequisites
 
 1. **Google Cloud CLI** (`gcloud`) – installed and authenticated to your GCP project.
 2. **Cloud Run** enabled in your GCP project. 
 3. **A Cloud SQL** instance for MySQL (or another DB solution). If using Cloud SQL, see the [Cloud SQL for MySQL and Cloud Run docs](https://cloud.google.com/sql/docs/mysql/connect-run).
 4. **Docker** – for building the container image locally (or you can use GitHub Actions to build it).
 
-### 3.2 Prepare the Dockerfile
+### Prepare the Dockerfile
 
 We already have a `Dockerfile` that looks like this:
 
@@ -153,7 +165,7 @@ CMD [ "node", "out/src/index.js"]
    - Replace `...` with your real values, e.g. the DB connection. 
    - If using Cloud SQL, you might set up a special JSON or the `socketPath` approach.
 
-### 3.4 CI/CD with GitHub Actions
+### CI/CD with GitHub Actions
 
 **Optional** but recommended. You can automate Docker builds and GCR deployments:
 
@@ -210,10 +222,12 @@ After merging to `master`, this workflow triggers, builds, and deploys automatic
 
 ---
 
-## 4. Summary
+## Conclusion
 
-- **Local**: `docker-compose up --build` → 2 containers (MySQL + Node) → auto migrations → UTXO manager on `localhost:8080`.
-- **Cloud**: Build Docker → push to GCR → `gcloud run deploy` → serverless environment. 
-- **CI**: Optionally set up GitHub Actions (or other pipelines) so changes to your code trigger a new container build and deployment.
+By following this setup, you can quickly spin up a UTXO management system—either locally with Docker Compose or in the cloud via Google Cloud Run. Customize your environment variables, monetization logic, database engine, or route controllers as needed. The wallet-infra repository aims to give you a solid foundation for building secure and flexible BSV wallet infrastructure, while remaining [BRC-100](https://github.com/bitcoin-sv/BRCs/blob/master/wallet/0100.md) compliant to ensure interoperability.
 
-With this, you have a straightforward path to run the server in dev or production, with minimal overhead and easy integration into your existing BSV wallet ecosystem.
+Feel free to fork and adapt this to your production needs.  Let's build the future of BSV Blockchain wallets together!
+
+## License
+
+The license for the code in this repository is the Open BSV License. Refer to [LICENSE.txt](./LICENSE.txt) for the license text.
