@@ -78,9 +78,10 @@ this will spin up:
    cd wallet-infra
    ```
 
-2. **Install local dependencies** (optional but helpful if you intend to run build steps outside Docker):
+2. **Install and build local dependencies** (optional but helpful if you intend to run build steps outside Docker):
    ```bash
    npm install
+   npm build
    ```
 
 3. **Configure environment variables**: 
