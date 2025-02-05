@@ -101,7 +101,7 @@ this will spin up:
 
 Make sure Docker is running on your machine, then run the following command:
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
    - This will:
      - **Build** the Node image from the included `Dockerfile`.
@@ -123,7 +123,7 @@ Make sure Docker is running on your machine, then run the following command:
 
 7. **Stopping**:
    ```bash
-   docker-compose down
+   docker compose down
    ```
 
 That’s it for local development. Each time you change code, you can re-run `docker-compose up --build` or rely on volume mounting for hot reload (though be mindful of overwriting `node_modules`).
