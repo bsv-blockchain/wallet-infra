@@ -6,30 +6,12 @@ Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), thi
 
 ## Table of Contents
 
-- [Deployment Options](#deployment-options)
 - [Key Features](#key-features)
-  - [Out-of-the-Box UTXO Management](#out-of-the-box-utxo-management)
-  - [Customizable Monetization](#customizable-monetization)
-  - [Mutual Authentication](#mutual-authentication)
-  - [Flexible Database Choice](#flexible-database-choice)
-  - [Extensible Codebase](#extensible-codebase)
-  - [Just Defaults—Feel-Free-to-Customize](#just-defaultsfeel-free-to-customize)
-- [Local Development Setup](#local-development-setup)
-  - [Requirements](#requirements)
-  - [Steps](#steps)
-- [Deploying to Google Cloud Run](#deploying-to-google-cloud-run)
-  - [Prerequisites](#prerequisites)
-  - [Prepare the Dockerfile](#prepare-the-dockerfile)
-  - [Deploy Manually with GCloud](#deploy-manually-with-gcloud)
-  - [CI/CD with GitHub Actions](#cicd-with-github-actions)
+- [Deployment Options](#deployment-options)
+  - [Local Development](#local-development)
+  - [Google Cloud Run Deployment](#google-cloud-run-deployment)
 - [Conclusion](#conclusion)
 - [License](#license)
-
-
-## Deployment Options
-
-1. **Local Development** – using Docker Compose for quick local iteration.
-2. **Google Cloud Run** – for deploying a production-grade container that runs on Google Cloud’s serverless platform.
 
 ## Key Features
 
@@ -57,199 +39,29 @@ Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), thi
 
 ---
 
-## Local Development Setup
+## Deployment Options
 
-Below are steps for **running locally** using **Docker Compose**: 
-this will spin up:
-1. A MySQL container
-2. The “utxo-management-server” container with Node.js
+Wallet Infra offers two main deployment paths, depending on your needs:
 
-### Requirements
+### Local Development
 
-- **Docker** installed (v20+ recommended)
-- **Node.js** installed if you plan to run `npm install` locally (v18+ recommended)
-- **Git** for code management (optional but typical)
+For quickly iterating on features and testing your wallet backend locally, follow the [**Local Development Guide**](./guides/local_development.md). This will walk you through spinning up a Docker Compose environment with MySQL and the Node.js server in minutes.
 
-### Steps
+### Google Cloud Run Deployment
 
-1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/bitcoin-sv/wallet-infra.git
-   cd wallet-infra
-   ```
-
-2. **Install and build local dependencies** (optional but helpful if you intend to run build steps outside Docker):
-   ```bash
-   npm install
-   npm run build
-   ```
-
-3. **Configure environment variables**: 
-   - Typically done inside the `docker-compose.yml`. 
-   - By default, we have:
-
-     ```yaml
-     environment:
-       NODE_ENV: development
-       HTTP_PORT: "8080"
-       SERVER_PRIVATE_KEY: "bffe0d7a3f7effce2b3511323c6cca1df1649e41a336a8b603194d53287ad285"
-       KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"rootPass","database":"wallet_storage","port":3306}'
-     ```
-   - You can edit these in `docker-compose.yml` to suit your environment. 
-
-4. **Run Docker Compose**:
-
-Make sure Docker is running on your machine, then run the following command:
-   ```bash
-   docker compose up --build
-   ```
-   - This will:
-     - **Build** the Node image from the included `Dockerfile`.
-     - **Launch** the MySQL container (exposing `3306` to your machine).
-     - **Launch** the Node container, automatically running migrations at startup.
-     - Node server will listen on port `8080` (mapped to `localhost:8080`).
-
-5. **Check logs**:
-   - You should see something like:
-     ```
-     utxo-management-server  | wallet-storage server v0.4.5
-     utxo-management-server  | wallet-storage server started
-     ```
-   - This indicates the system is ready and listening on `http://localhost:8080`.
-
-6. **Connect a wallet client**:
-   - Configure your client so that the “remote storage” is at `http://localhost:8080` (or the relevant host/port).
-   - The server manages your UTXOs in MySQL.
-
-7. **Stopping**:
-   ```bash
-   docker compose down
-   ```
-
-That’s it for local development. Each time you change code, you can re-run `docker-compose up --build` or rely on volume mounting for hot reload (though be mindful of overwriting `node_modules`).
-
----
-
-## Deploying to Google Cloud Run
-
-For **production** or cloud usage, we recommend deploying the Docker container to **Google Cloud Run**. Below is a high-level overview.
-
-### Prerequisites
-
-1. **Google Cloud CLI** (`gcloud`) – installed and authenticated to your GCP project.
-2. **Cloud Run** enabled in your GCP project. 
-3. **A Cloud SQL** instance for MySQL (or another DB solution). If using Cloud SQL, see the [Cloud SQL for MySQL and Cloud Run docs](https://cloud.google.com/sql/docs/mysql/connect-run).
-4. **Docker** – for building the container image locally (or you can use GitHub Actions to build it).
-
-### Prepare the Dockerfile
-
-We already have a `Dockerfile` that looks like this:
-
-```dockerfile
-FROM node:20-alpine
-
-# Install nginx (optional)
-RUN apk add --no-cache --update nginx && \
-    chown -R nginx:www-data /var/lib/nginx
-
-COPY ./nginx.conf /etc/nginx/nginx.conf
-EXPOSE 8080
-
-WORKDIR /app
-COPY . .
-RUN npm i knex -g && \
-    npm run build
-
-# By default, node out/src/index.js. It will conditionally run Nginx if NODE_ENV != development
-CMD [ "node", "out/src/index.js"]
-```
-
-**If you prefer** to skip Nginx in production, you can remove the `RUN apk add` and references to `nginx`. The code in `index.ts` spawns Nginx only if `NODE_ENV !== 'development'`.
-
-### Deploy Manually with GCloud
-
-1. **Build** your image:
-   ```bash
-   docker build -t gcr.io/PROJECT_ID/utxo-management-server:latest .
-   ```
-2. **Push** to your GCR or Artifact Registry:
-   ```bash
-   docker push gcr.io/PROJECT_ID/utxo-management-server:latest
-   ```
-3. **Deploy** to Cloud Run:
-   ```bash
-   gcloud run deploy utxo-management-server \
-     --image gcr.io/PROJECT_ID/utxo-management-server:latest \
-     --region=us-west1 \
-     --platform=managed \
-     --allow-unauthenticated \
-     --set-env-vars="NODE_ENV=production,HTTP_PORT=8080,SERVER_PRIVATE_KEY=...,KNEX_DB_CONNECTION=..."
-   ```
-   - Replace `...` with your real values, e.g. the DB connection. 
-   - If using Cloud SQL, you might set up a special JSON or the `socketPath` approach.
-
-### CI/CD with GitHub Actions
-
-**Optional** but recommended. You can automate Docker builds and GCR deployments:
-
-1. **Add** your GitHub secrets, e.g. `GCP_PROJECT_ID`, `GCP_SA_KEY` (service account JSON), `KNEX_DB_CONNECTION`, etc.
-2. **Create** `.github/workflows/deploy.yaml` with a job that:
-   - Checks out the repo.
-   - Authenticates to GCP (using `google-github-actions/auth`).
-   - Builds & pushes the Docker image to GCR.
-   - Calls `gcloud run deploy` with the environment variables needed.
-
-For instance:
-
-```yaml
-name: Deploy to Cloud Run
-
-on:
-  push:
-    branches: [ "master" ]
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Configure docker
-        run: gcloud auth configure-docker
-
-      - name: Build
-        run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/utxo-management-server:${{ github.sha }} .
-      
-      - name: Push Docker image
-        run: |
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/utxo-management-server:${{ github.sha }}
-      
-      - name: Deploy
-        run: |
-          gcloud run deploy utxo-management-server \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/utxo-management-server:${{ github.sha }} \
-            --region=us-west1 \
-            --platform=managed \
-            --allow-unauthenticated \
-            --set-env-vars="KNEX_DB_CONNECTION=${{ secrets.KNEX_DB_CONNECTION }},SERVER_PRIVATE_KEY=${{ secrets.SERVER_PRIVATE_KEY }},HTTP_PORT=8080,NODE_ENV=production"
-```
-
-After merging to `master`, this workflow triggers, builds, and deploys automatically.
+If you prefer a serverless, production-grade setup, follow the [**Google Cloud Deployment Guide**](./GCLOUD_DEPLOYMENT.md) for detailed instructions on:
+- Creating a MySQL database on Cloud SQL (or using your own DB)  
+- Building and pushing the Docker image to Google Cloud  
+- Deploying to Cloud Run with environment variables  
+- Optional CI/CD with GitHub Actions  
 
 ---
 
 ## Conclusion
 
-By following this setup, you can quickly spin up a UTXO management system—either locally with Docker Compose or in the cloud via Google Cloud Run. Customize your environment variables, monetization logic, database engine, or route controllers as needed. The wallet-infra repository aims to give you a solid foundation for building secure and flexible BSV wallet infrastructure, while remaining [BRC-100](https://github.com/bitcoin-sv/BRCs/blob/master/wallet/0100.md) compliant to ensure interoperability.
+By following one of these setup guides, you can quickly spin up a UTXO management system—either locally with Docker Compose or in the cloud via Google Cloud Run. Customize environment variables, monetization logic, database integrations, or route controllers as desired. This repository aims to give you a robust yet flexible foundation for building secure BSV wallet infrastructure, while staying [BRC-100](https://github.com/bitcoin-sv/BRCs/blob/master/wallet/0100.md) compliant.
 
-Feel free to fork and adapt this to your production needs.  Let's build the future of BSV Blockchain wallets together!
+Feel free to fork and adapt this to your production needs. Let’s build the future of BSV Blockchain wallets together!
 
 ## License
 
