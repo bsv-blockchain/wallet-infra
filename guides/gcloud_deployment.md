@@ -187,7 +187,9 @@ HTTP_PORT: "8080"
 SERVER_PRIVATE_KEY: "<PRIVATE_KEY>"
 KNEX_DB_CONNECTION: '{"host": "<HOST>", "user": "wallet_admin", "password": "<ANOTHER_SECURE_PASS>", "database": "wallet_storage", "port": 3306}'
 ```
-Update the example environment values as needed.
+Update the example environment values as needed. 
+
+You may also want to include `env.yaml` in your .gitignore to prevent committing environment secrets. 
 
 - **`NODE_ENV=production`**: Ensures production settings (e.g., possibly using Nginx).  
 - **`HTTP_PORT=8080`**: Cloud Run default.  
