@@ -4,15 +4,6 @@ This repository serves as a reference implementation for building and deploying 
 
 Built on the [wallet-toolbox](https://github.com/bitcoin-sv/wallet-toolbox), this implementation empowers developers with extensive customization options for authentication, monetization, and database management to name a few.
 
-## Table of Contents
-
-- [Key Features](#key-features)
-- [Deployment Options](#deployment-options)
-  - [Local Development](#local-development)
-  - [Google Cloud Run Deployment](#google-cloud-run-deployment)
-- [Conclusion](#conclusion)
-- [License](#license)
-
 ## Key Features
 
 1. #### Out-of-the-Box UTXO Management
@@ -56,12 +47,6 @@ If you prefer a serverless, production-grade setup, follow the [**Google Cloud D
 - Optional CI/CD with GitHub Actions  
 
 ---
-
-## Conclusion
-
-By following one of these setup guides, you can quickly spin up a UTXO management system—either locally with Docker Compose or in the cloud via Google Cloud Run. Customize environment variables, monetization logic, database integrations, or route controllers as desired. This repository aims to give you a robust yet flexible foundation for building secure BSV wallet infrastructure, while staying [BRC-100](https://github.com/bitcoin-sv/BRCs/blob/master/wallet/0100.md) compliant.
-
-Feel free to fork and adapt this to your production needs. Let’s build the future of BSV Blockchain wallets together!
 
 ## License
 
