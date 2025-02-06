@@ -31,7 +31,8 @@ This guide explains how to run the UTXO Management Server **locally** using **Do
 
      ```yaml
      environment:
-       NODE_ENV: development
+       NODE_ENV: "development"
+       BSV_NETWORK: "test" # main | test
        HTTP_PORT: "8080"
        SERVER_PRIVATE_KEY: "bffe0d7a3f7effce2b3511323c6cca1df1649e41a336a8b603194d53287ad285"
        KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"rootPass","database":"wallet_storage","port":3306}'

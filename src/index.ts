@@ -18,7 +18,7 @@ dotenv.config()
 
 // Load environment variables
 const {
-  NODE_ENV = 'development',
+  BSV_NETWORK = 'test',
   ENABLE_NGINX = 'false',
   HTTP_PORT = 3998,
   SERVER_PRIVATE_KEY,
@@ -65,7 +65,9 @@ async function setupWalletStorageAndMonitor(): Promise<{
       }
     }
     const knex = makeKnex(knexConfig)
-    const chain = NODE_ENV === 'production' ? 'main' : 'test'
+
+    // use testnet unless BSV_NETWORK env variable is set to exactly "main"
+    const chain = BSV_NETWORK !== 'main' ? 'test' : 'main'
 
     // Initialize storage components
     const rootKey = bsv.PrivateKey.fromHex(SERVER_PRIVATE_KEY)
