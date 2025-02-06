@@ -189,6 +189,7 @@ Before deploying, create an env.yaml file in your local directory to store envir
 
 ```yaml
 NODE_ENV: "production"
+ENABLE_NGINX: "true"
 HTTP_PORT: "8080"
 SERVER_PRIVATE_KEY: "<PRIVATE_KEY>"
 KNEX_DB_CONNECTION: '{"host": "<HOST>", "user": "wallet_admin", "password": "<ANOTHER_SECURE_PASS>", "database": "wallet_storage", "port": 3306}'
@@ -197,7 +198,8 @@ Update the example environment values as needed.
 
 You may also want to include `env.yaml` in your .gitignore to prevent committing environment secrets. 
 
-- **`NODE_ENV=production`**: Ensures production settings (e.g., possibly using Nginx).  
+- **`NODE_ENV=production`**: Ensures production settings (e.g., mainnet chian).
+- **`ENABLE_NGINX=true`**: By default, GCR limits requests to 32mb. When an nginx proxy is combined with the HTTP/2 passthrough on GCR, it increases the request size allowed.
 - **`HTTP_PORT=8080`**: Cloud Run default.  
 - **`SERVER_PRIVATE_KEY`**: Your server’s private key for authenticating requests (do **not** include quotes).  
 - **`KNEX_DB_CONNECTION`**: Must be a valid JSON string (a string representation of a JSON object). When defined in env.yaml, it should be enclosed in single quotes to ensure YAML treats it as a string.
@@ -210,8 +212,10 @@ gcloud run deploy utxo-management-server \
   --region=us-west1 \
   --platform=managed \
   --allow-unauthenticated \
+  --use-http2 \
   --env-vars-file=env.yaml
 ```
+With `--use-http2`, your container can see full HTTP/2 requests (especially relevant if you’re doing streaming gRPC or advanced HTTP/2 features in Nginx).
 
 ---
 
@@ -304,6 +308,7 @@ You can automate Docker builds and GCR deployments using GitHub Actions:
                 --region=us-west1 \
                 --platform=managed \
                 --allow-unauthenticated \
+                --use-http2 \
                 --env-vars-file=env.yaml
    ```
 

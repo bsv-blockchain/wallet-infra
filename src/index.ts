@@ -19,6 +19,7 @@ dotenv.config()
 // Load environment variables
 const {
   NODE_ENV = 'development',
+  ENABLE_NGINX = 'false',
   HTTP_PORT = 3998,
   SERVER_PRIVATE_KEY,
   KNEX_DB_CONNECTION
@@ -130,7 +131,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     console.log('wallet-storage server started')
 
     // Conditionally start nginx
-    if (NODE_ENV !== 'development') {
+    if (ENABLE_NGINX === 'true') {
       console.log('Spawning nginx...')
       spawn('nginx', [], { stdio: ['inherit', 'inherit', 'inherit'] })
       console.log('nginx is up!')
