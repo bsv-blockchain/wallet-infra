@@ -40,7 +40,7 @@ For quickly iterating on features and testing your wallet backend locally, follo
 
 ### Google Cloud Run Deployment
 
-If you prefer a serverless, production-grade setup, follow the [**Google Cloud Deployment Guide**](./GCLOUD_DEPLOYMENT.md) for detailed instructions on:
+If you prefer a serverless, production-grade setup, follow the [**Google Cloud Deployment Guide**](./guides/gcloud_deployment.md) for detailed instructions on:
 - Creating a MySQL database on Cloud SQL (or using your own DB)  
 - Building and pushing the Docker image to Google Cloud  
 - Deploying to Cloud Run with environment variables  
