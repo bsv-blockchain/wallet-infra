@@ -5,3 +5,4 @@ functions
 yarn.lock
 .DS_Store
 out
+env.yaml

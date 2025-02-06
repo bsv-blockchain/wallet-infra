@@ -184,7 +184,7 @@ Before deploying, create an env.yaml file in your local directory to store envir
 ```yaml
 NODE_ENV: "production"
 HTTP_PORT: "8080"
-SERVER_PRIVATE_KEY: "<PRIVATE_KEY>>"
+SERVER_PRIVATE_KEY: "<PRIVATE_KEY>"
 KNEX_DB_CONNECTION: '{"host": "<HOST>", "user": "wallet_admin", "password": "<ANOTHER_SECURE_PASS>", "database": "wallet_storage", "port": 3306}'
 ```
 Update the example environment values as needed.
