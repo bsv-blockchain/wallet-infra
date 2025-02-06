@@ -153,6 +153,12 @@ If you can connect via a local MySQL client (such as MySQLWorkbench) using these
 
 ## 6. Build Your Docker Image
 
+**Install and build local dependencies** (the Dockerfile will copy over node_modules):
+   ```bash
+   npm install
+   npm run build
+   ```
+
 From your project’s root folder:
 
 ```bash
