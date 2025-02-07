@@ -2,7 +2,7 @@ import * as bsv from '@bsv/sdk'
 import {
   Services,
   StorageKnex,
-  table,
+  TableSettings,
   WalletStorageManager,
   WalletStorageServerOptions,
   StorageServer,
@@ -30,7 +30,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
   activeStorage: StorageKnex
   storage: WalletStorageManager
   services: Services
-  settings: table.Settings
+  settings: TableSettings
   keyDeriver: bsv.KeyDeriver
   signer: sdk.WalletSigner
   wallet: Wallet
