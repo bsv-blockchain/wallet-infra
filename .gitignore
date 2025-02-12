@@ -6,3 +6,5 @@ yarn.lock
 .DS_Store
 out
 env.yaml
+test.env.yaml
+main.env.yaml

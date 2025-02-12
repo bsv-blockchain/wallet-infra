@@ -213,10 +213,9 @@ gcloud run deploy utxo-management-server \
   --region=us-west1 \
   --platform=managed \
   --allow-unauthenticated \
-  --use-http2 \
   --env-vars-file=env.yaml
 ```
-With `--use-http2`, your container can see full HTTP/2 requests (especially relevant if you’re doing streaming gRPC or advanced HTTP/2 features in Nginx).
+You can add `--use-http2`, if you want your container to see full HTTP/2 requests (especially relevant if you’re doing streaming gRPC or advanced HTTP/2 features in Nginx).
 
 ---
 
