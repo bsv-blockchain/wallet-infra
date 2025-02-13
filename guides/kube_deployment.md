@@ -7,6 +7,32 @@ The example configurations in `guides/kube_samples/` demonstrate a basic wallet 
 
 Example Kubernetes configurations can be found in the `guides/kube_samples/` directory. These provide a basic starting point but should be adapted for production use with the improvements mentioned above.
 
+## Managing Secrets
+
+The wallet application requires several sensitive configurations that should be properly managed as secrets:
+
+1. Create secrets directly (development only):
+   ```bash
+   # Create MySQL secrets
+   kubectl create secret generic mysql-secrets \
+     --namespace wallet-infra \
+     --from-literal=MYSQL_ROOT_PASSWORD='your-secure-password'
+
+   # Create wallet secrets
+   kubectl create secret generic wallet-secrets \
+     --namespace wallet-infra \
+     --from-literal=SERVER_PRIVATE_KEY='your-private-key-hex' \
+     --from-literal=KNEX_DB_CONNECTION='{"host":"mysql","user":"root","password":"same-as-mysql-root-password","database":"wallet_storage","port":3306}'
+   ```
+
+   > **Note**: Replace the placeholder values with your actual secure passwords and keys. Use single quotes to handle special characters in passwords.
+
+For production environments, consider these approaches:
+- Use a secrets management service (HashiCorp Vault, AWS Secrets Manager)
+- Implement a secrets operator (External Secrets Operator)
+- Use sealed secrets for GitOps workflows
+- Never store sensitive data in ConfigMaps or version control
+
 ## Getting Started
 
 **Note:** These examples are based on an AWS environment and will need to be modified for your specific setup:
@@ -56,7 +82,6 @@ For a production environment, consider these improvements:
 - Implement monitoring with Prometheus and Grafana
 - Set up proper logging with ELK/EFK stack
 - Use managed database service (e.g., AWS RDS) instead of self-hosted MySQL
-- Use external secrets management (HashiCorp Vault, AWS Secrets Manager)
 
 ### Scalability and Reliability
 - Configure horizontal pod autoscaling

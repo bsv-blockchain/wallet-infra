@@ -32,7 +32,10 @@ spec:
         image: mysql:8
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "changeme"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secrets
+              key: MYSQL_ROOT_PASSWORD
         - name: MYSQL_DATABASE
           value: wallet_storage
         ports:

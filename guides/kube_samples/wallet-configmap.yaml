@@ -8,5 +8,3 @@ data:
   HTTP_PORT: "8080"
   BSV_NETWORK: "main"
   ENABLE_NGINX: "false"
-  KNEX_DB_CONNECTION: '{"host":"mysql","user":"root","password":"changeme","database":"wallet_storage","port":3306}'
-  SERVER_PRIVATE_KEY: "<PRIVATE_KEY_HEX_STRING>"

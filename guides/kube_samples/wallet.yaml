@@ -39,6 +39,8 @@ spec:
         envFrom:
         - configMapRef:
             name: wallet-config
+        - secretRef:
+            name: wallet-secrets
         resources:
           requests:
             cpu: 200m
