@@ -1,7 +1,6 @@
 # Kubernetes Deployment Guide
 
-This guide provides an short overview of deploying the Wallet Infra on Kubernetes.
-
+This guide provides a short overview of deploying the Wallet Infra on Kubernetes.
 The example configurations in `guides/kube_samples/` demonstrate a basic wallet infrastructure deployment consisting of a wallet application backed by a MySQL database. The setup includes a dedicated namespace, configuration management through ConfigMaps, a MySQL database deployment with its service, and the main wallet application deployment with an Ingress for external access. The wallet application is exposed through a service and configured with an Ingress controller for HTTP routing.
 
 ## Example Configurations
