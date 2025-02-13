@@ -45,9 +45,7 @@ For production environments, consider these approaches:
 1. Build and push the wallet-infra image to your container registry. For example:
 
 ```bash
-docker build -t wallet-infra .
-# Tag the image for your registry
-docker tag wallet-infra your-registry/wallet-infra:latest
+docker build -t your-registry/wallet-infra:latest .
 # Push to your registry
 docker push your-registry/wallet-infra:latest
 # Update the image path in `wallet.yaml` to point to your registry
