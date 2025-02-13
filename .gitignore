@@ -4,6 +4,7 @@ yarn-error.log
 functions
 yarn.lock
 .DS_Store
+.idea
 out
 env.yaml
 test.env.yaml
