@@ -5,8 +5,7 @@ The example configurations in `guides/kube_samples/` demonstrate a basic wallet 
 
 ## Example Configurations
 
-Example Kubernetes configurations can be found in the `guides/kube_samples/` directory. These provide a basic starting point but should be adapted for production use with the improvements mentioned above.
-
+Example Kubernetes configurations can be found in the `guides/kube_samples/` directory. These provide a basic starting point, but should be adapted for production use with the improvements mentioned above.
 ## Managing Secrets
 
 The wallet application requires several sensitive configurations that should be properly managed as secrets:
