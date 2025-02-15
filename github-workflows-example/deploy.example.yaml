@@ -32,9 +32,13 @@ jobs:
         env:
           IMAGE: "${{ env.GCR_HOST }}/${{ env.GOOGLE_PROJECT_ID }}/${{ env.GCR_IMAGE_NAME }}:${{ env.CURRENT_BRANCH }}-${{ github.sha }}"
           SERVICE: ${{ env.CURRENT_BRANCH =='production' && 'prod-ums' || 'staging-ums' }}
-          NODE_ENV: ${{                env.CURRENT_BRANCH =='production' && secrets.PROD_NODE_ENV || secrets.STAGING_NODE_ENV }}
+          BSV_NETWORK: ${{                env.CURRENT_BRANCH =='production' && secrets.PROD_BSV_NETWORK || secrets.STAGING_BSV_NETWORK }}
           KNEX_DB_CONNECTION: ${{      env.CURRENT_BRANCH =='production' && secrets.PROD_KNEX_DB_CONNECTION || secrets.STAGING_KNEX_DB_CONNECTION }}
           SERVER_PRIVATE_KEY: ${{      env.CURRENT_BRANCH =='production' && secrets.PROD_SERVER_PRIVATE_KEY || secrets.STAGING_SERVER_PRIVATE_KEY }}
+          TAAL_API_KEY: ${{    env.CURRENT_BRANCH =='production' && secrets.PROD_TAAL_API_KEY || secrets.STAGING_TAAL_API_KEY }}
+          COMMISSION_FEE: ${{      env.CURRENT_BRANCH =='production' && secrets.PROD_COMMISSION_FEE || secrets.STAGING_COMMISSION_FEE }}
+          COMMISSION_PUBLIC_KEY: ${{      env.CURRENT_BRANCH =='production' && secrets.PROD_COMMISSION_PUBLIC_KEY || secrets.STAGING_COMMISSION_PUBLIC_KEY }}
+          FEE_MODEL: ${{      env.CURRENT_BRANCH =='production' && secrets.PROD_FEE_MODEL || secrets.STAGING_FEE_MODEL }}
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.gcp_deploy_creds }}
