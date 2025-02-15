@@ -1,5 +1,5 @@
 {
-  "name": "@cwi/storage",
+  "name": "wallet-infra",
   "version": "1.0.0",
   "description": "UTXO Management Server",
   "author": "BSV Blockchain Association",
