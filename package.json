@@ -6,7 +6,7 @@
   "license": "SEE LICENSE IN LICENSE.txt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/p2ppsr/storage.git"
+    "url": "git+https://github.com/bitcoin-sv/wallet-infra.git"
   },
   "keywords": [
     "BSV",
