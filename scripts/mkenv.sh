@@ -30,7 +30,7 @@ echo "Appending to $1"
 perl -E'
   say "        - name: $_
           value: \x27$ENV{$_}\x27" for @ARGV;
-' KNEX_DB_CONNECTION SERVER_PRIVATE_KEY HTTP_PORT >> $1
+' BSV_NETWORK KNEX_DB_CONNECTION SERVER_PRIVATE_KEY TAAL_API_KEY COMMISSION_FEE COMMISSION_PUBLIC_KEY FEE_MODEL  >> $1
 
 echo "Built! Contents of $1:"
 cat $1

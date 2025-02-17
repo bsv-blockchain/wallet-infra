@@ -10,17 +10,21 @@ import {
 } from '@bsv/wallet-toolbox'
 import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
-import * as dotenv from 'dotenv'
 
+import * as dotenv from 'dotenv'
 dotenv.config()
 
 // Load environment variables
 const {
   BSV_NETWORK = 'test',
-  ENABLE_NGINX = 'false',
-  HTTP_PORT = 3998,
+  ENABLE_NGINX = 'true',
+  HTTP_PORT = 8081, // Must be 8081 if ENABLE_NGINX 'true', 
   SERVER_PRIVATE_KEY,
-  KNEX_DB_CONNECTION
+  KNEX_DB_CONNECTION,
+  TAAL_API_KEY,
+  COMMISSION_FEE = 0,
+  COMMISSION_PUBLIC_KEY,
+  FEE_MODEL = '{"model":"sat/kb","value":1}'
 } = process.env
 
 async function setupWalletStorageAndMonitor(): Promise<{
@@ -40,6 +44,11 @@ async function setupWalletStorageAndMonitor(): Promise<{
     }
     if (!KNEX_DB_CONNECTION) {
       throw new Error('KNEX_DB_CONNECTION must be set')
+    }
+    if (!COMMISSION_FEE && !COMMISSION_PUBLIC_KEY) {
+      throw new Error(
+        'COMMISSION_PUBLIC_KEY must be set when COMMISSION_FEE is greater than zero'
+      )
     }
     // Parse database connection details
     const connection = JSON.parse(KNEX_DB_CONNECTION)
@@ -73,19 +82,26 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const activeStorage = new StorageKnex({
       chain,
       knex,
-      commissionSatoshis: 0,
-      commissionPubKeyHex: undefined,
-      feeModel: { model: 'sat/kb', value: 1 }
+      commissionSatoshis: Number.isInteger(COMMISSION_FEE)
+        ? Number(COMMISSION_FEE)
+        : 0,
+      commissionPubKeyHex: COMMISSION_PUBLIC_KEY || undefined,
+      feeModel: JSON.parse(FEE_MODEL)
     })
 
     await activeStorage.migrate(databaseName, storageIdentityKey)
     const settings = await activeStorage.makeAvailable()
 
-    const storage = new WalletStorageManager(settings.storageIdentityKey, activeStorage)
+    const storage = new WalletStorageManager(
+      settings.storageIdentityKey,
+      activeStorage
+    )
     await storage.makeAvailable()
 
     // Initialize wallet components
-    const services = new Services(chain)
+    const servOpts = Services.createDefaultOptions(chain)
+    if (TAAL_API_KEY) servOpts.taalApiKey = TAAL_API_KEY
+    const services = new Services(servOpts)
     const keyDeriver = new bsv.KeyDeriver(rootKey)
     const wallet = new Wallet({ chain, keyDeriver, storage, services })
 
@@ -118,10 +134,10 @@ async function setupWalletStorageAndMonitor(): Promise<{
 }
 
 // Main function to start the server
-(async () => {
+;(async () => {
   try {
     const context = await setupWalletStorageAndMonitor()
-    console.log('wallet-toolbox StorageServer v1.1.8')
+    console.log('wallet-toolbox StorageServer v1.1.13')
     console.log(JSON.stringify(context.settings, null, 2))
 
     context.server.start()
@@ -132,7 +148,6 @@ async function setupWalletStorageAndMonitor(): Promise<{
       console.log('Spawning nginx...')
       spawn('nginx', [], { stdio: ['inherit', 'inherit', 'inherit'] })
       console.log('nginx is up!')
-
     }
   } catch (error) {
     console.error('Error starting server:', error)
