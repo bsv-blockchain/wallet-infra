@@ -18,7 +18,7 @@ dotenv.config()
 const {
   BSV_NETWORK = 'test',
   ENABLE_NGINX = 'true',
-  HTTP_PORT = 8081, // Must be 8081 if ENABLE_NGINX 'true', 
+  HTTP_PORT = 8081, // Must be 8081 if ENABLE_NGINX 'true',
   SERVER_PRIVATE_KEY,
   KNEX_DB_CONNECTION,
   TAAL_API_KEY,
