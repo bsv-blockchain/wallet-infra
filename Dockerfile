@@ -9,7 +9,10 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
 WORKDIR /app
-COPY . .
+COPY package.json .
+COPY src/ src/
+RUN npm i
+COPY tsconfig.json .
 RUN npm i knex typescript -g && \
     npm run build
 CMD [ "node", "out/src/index.js"]

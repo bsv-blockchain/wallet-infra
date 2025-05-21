@@ -25,7 +25,7 @@
     "start": "node out/src/index.js",
     "lint": "prettier --write 'src/**/*.ts' --log-level silent",
     "build": "tsc --build",
-    "prepublish": "npm run lint && npm run build"
+    "prepublish": "npm run lint"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
