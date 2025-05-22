@@ -45,7 +45,11 @@ async function setupWalletStorageAndMonitor(): Promise<{
     if (!KNEX_DB_CONNECTION) {
       throw new Error('KNEX_DB_CONNECTION must be set')
     }
-    if (!COMMISSION_FEE && !COMMISSION_PUBLIC_KEY) {
+
+    const numCommissionFee = Number(COMMISSION_FEE)
+    const commissionSatoshis = Number.isInteger(numCommissionFee) ? numCommissionFee : 0
+
+    if (commissionSatoshis > 0 && !COMMISSION_PUBLIC_KEY) {
       throw new Error(
         'COMMISSION_PUBLIC_KEY must be set when COMMISSION_FEE is greater than zero'
       )
@@ -82,9 +86,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const activeStorage = new StorageKnex({
       chain,
       knex,
-      commissionSatoshis: Number.isInteger(COMMISSION_FEE)
-        ? Number(COMMISSION_FEE)
-        : 0,
+      commissionSatoshis,
       commissionPubKeyHex: COMMISSION_PUBLIC_KEY || undefined,
       feeModel: JSON.parse(FEE_MODEL)
     })
@@ -137,7 +139,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
 ;(async () => {
   try {
     const context = await setupWalletStorageAndMonitor()
-    console.log('wallet-toolbox StorageServer v1.1.13')
+    console.log('wallet-toolbox StorageServer v1.3.30')
     console.log(JSON.stringify(context.settings, null, 2))
 
     context.server.start()
