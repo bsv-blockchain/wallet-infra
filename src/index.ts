@@ -6,7 +6,8 @@ import {
   WalletStorageManager,
   WalletStorageServerOptions,
   StorageServer,
-  Wallet
+  Wallet,
+  Monitor
 } from '@bsv/wallet-toolbox'
 import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
@@ -105,7 +106,12 @@ async function setupWalletStorageAndMonitor(): Promise<{
     if (TAAL_API_KEY) servOpts.taalApiKey = TAAL_API_KEY
     const services = new Services(servOpts)
     const keyDeriver = new bsv.KeyDeriver(rootKey)
-    const wallet = new Wallet({ chain, keyDeriver, storage, services })
+
+    const monopts = Monitor.createDefaultWalletMonitorOptions(chain, storage, services)
+    const monitor = new Monitor(monopts)
+    monitor.addDefaultTasks()
+    
+    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor })
 
     // Set up server options
     const serverOptions: WalletStorageServerOptions = {
