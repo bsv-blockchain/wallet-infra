@@ -1,6 +1,7 @@
 {
   "name": "wallet-infra",
   "version": "1.2.0",
+  "type": "commonjs",
   "description": "UTXO Management Server",
   "author": "BSV Blockchain Association",
   "license": "SEE LICENSE IN LICENSE.txt",
@@ -41,5 +42,10 @@
     "express": "^4.18.2",
     "knex": "^3.1.0",
     "mysql2": "^3.12.0"
+  },
+  "overrides": {
+    "@bsv/payment-express-middleware": {
+      "type": "commonjs"
+    }
   }
 }
