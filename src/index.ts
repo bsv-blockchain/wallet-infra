@@ -48,7 +48,9 @@ async function setupWalletStorageAndMonitor(): Promise<{
     }
 
     const numCommissionFee = Number(COMMISSION_FEE)
-    const commissionSatoshis = Number.isInteger(numCommissionFee) ? numCommissionFee : 0
+    const commissionSatoshis = Number.isInteger(numCommissionFee)
+      ? numCommissionFee
+      : 0
 
     if (commissionSatoshis > 0 && !COMMISSION_PUBLIC_KEY) {
       throw new Error(
@@ -107,10 +109,14 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const services = new Services(servOpts)
     const keyDeriver = new bsv.KeyDeriver(rootKey)
 
-    const monopts = Monitor.createDefaultWalletMonitorOptions(chain, storage, services)
+    const monopts = Monitor.createDefaultWalletMonitorOptions(
+      chain,
+      storage,
+      services
+    )
     const monitor = new Monitor(monopts)
     monitor.addDefaultTasks()
-    
+
     const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor })
 
     // Set up server options
