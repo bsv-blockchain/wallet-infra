@@ -7,9 +7,9 @@ services:
     restart: always
     ports:
       - "8080:8080"        # Map host:8080 to container:8080 (Node server)
-    volumes:
+    # volumes:
       # Optional: mount your local code so changes reflect without rebuilding
-      - .:/app
+      # - .:/app
       # If you do volume-mount your source code, be careful not to overwrite /app/node_modules
       # e.g. add a named volume for node_modules or rely on "npm install" inside container.
     environment:

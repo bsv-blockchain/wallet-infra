@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Install nginx
 RUN echo "http://dl-4.alpinelinux.org/alpine/v3.3/main" >> /etc/apk/repositories && \
@@ -13,6 +13,6 @@ COPY package.json .
 COPY src/ src/
 RUN npm i
 COPY tsconfig.json .
-RUN npm i knex typescript -g && \
-    npm run build
+RUN npm i knex typescript -g
+RUN npm run build
 CMD [ "node", "out/src/index.js"]

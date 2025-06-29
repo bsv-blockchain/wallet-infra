@@ -1,4 +1,4 @@
-import * as bsv from '@bsv/sdk'
+import { PrivateKey, KeyDeriver } from '@bsv/sdk'
 import {
   Services,
   StorageKnex,
@@ -35,7 +35,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
   storage: WalletStorageManager
   services: Services
   settings: TableSettings
-  keyDeriver: bsv.KeyDeriver
+  keyDeriver: KeyDeriver
   wallet: Wallet
   server: StorageServer
 }> {
@@ -83,7 +83,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const chain = BSV_NETWORK !== 'main' ? 'test' : 'main'
 
     // Initialize storage components
-    const rootKey = bsv.PrivateKey.fromHex(SERVER_PRIVATE_KEY)
+    const rootKey = PrivateKey.fromHex(SERVER_PRIVATE_KEY)
     const storageIdentityKey = rootKey.toPublicKey().toString()
 
     const activeStorage = new StorageKnex({
@@ -107,7 +107,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const servOpts = Services.createDefaultOptions(chain)
     if (TAAL_API_KEY) servOpts.taalApiKey = TAAL_API_KEY
     const services = new Services(servOpts)
-    const keyDeriver = new bsv.KeyDeriver(rootKey)
+    const keyDeriver = new KeyDeriver(rootKey)
 
     const monopts = Monitor.createDefaultWalletMonitorOptions(
       chain,
