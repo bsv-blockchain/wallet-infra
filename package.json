@@ -1,6 +1,6 @@
 {
   "name": "wallet-infra",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "UTXO Management Server",
   "author": "BSV Blockchain Association",
   "license": "SEE LICENSE IN LICENSE.txt",
