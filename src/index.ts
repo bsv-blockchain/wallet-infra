@@ -105,7 +105,10 @@ async function setupWalletStorageAndMonitor(): Promise<{
 
     // Initialize wallet components
     const servOpts = Services.createDefaultOptions(chain)
-    if (TAAL_API_KEY) servOpts.taalApiKey = TAAL_API_KEY
+    if (TAAL_API_KEY) {
+      servOpts.arcConfig.apiKey = TAAL_API_KEY
+      servOpts.taalApiKey = TAAL_API_KEY
+    }
     const services = new Services(servOpts)
     const keyDeriver = new KeyDeriver(rootKey)
 
