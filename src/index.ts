@@ -1,6 +1,7 @@
 import { PrivateKey, KeyDeriver } from '@bsv/sdk'
 import {
   Services,
+  MockServices,
   StorageKnex,
   TableSettings,
   WalletStorageManager,
@@ -11,6 +12,7 @@ import {
 } from '@bsv/wallet-toolbox'
 import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
+import packageJson from '../package.json'
 
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -80,7 +82,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const knex = makeKnex(knexConfig)
 
     // use testnet unless BSV_NETWORK env variable is set to exactly "main"
-    const chain = BSV_NETWORK !== 'main' ? 'test' : 'main'
+    const chain = BSV_NETWORK as "main" | "test" | "teratest" | "mock"
 
     // Initialize storage components
     const rootKey = PrivateKey.fromHex(SERVER_PRIVATE_KEY)
@@ -104,12 +106,17 @@ async function setupWalletStorageAndMonitor(): Promise<{
     await storage.makeAvailable()
 
     // Initialize wallet components
-    const servOpts = Services.createDefaultOptions(chain)
-    if (TAAL_API_KEY) {
-      servOpts.arcConfig.apiKey = TAAL_API_KEY
-      servOpts.taalApiKey = TAAL_API_KEY
+    let services
+    if(chain === "mock") {
+      services = new MockServices(knex)
+    } else {
+      const servOpts = Services.createDefaultOptions(chain)
+      if (TAAL_API_KEY) {
+        servOpts.arcConfig.apiKey = TAAL_API_KEY
+        servOpts.taalApiKey = TAAL_API_KEY
+      }
+      services = new Services(servOpts)
     }
-    const services = new Services(servOpts)
     const keyDeriver = new KeyDeriver(rootKey)
 
     const monopts = Monitor.createDefaultWalletMonitorOptions(
@@ -154,7 +161,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
 ;(async () => {
   try {
     const context = await setupWalletStorageAndMonitor()
-    console.log('wallet-toolbox StorageServer v1.3.30')
+    console.log('wallet-toolbox v' + packageJson.dependencies['@bsv/wallet-toolbox'])
     console.log(JSON.stringify(context.settings, null, 2))
 
     context.server.start()
