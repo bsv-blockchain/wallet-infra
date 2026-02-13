@@ -1,4 +1,4 @@
-import { PrivateKey, KeyDeriver } from '@bsv/sdk'
+import { PrivateKey, KeyDeriver, LookupResolver } from '@bsv/sdk'
 import {
   Services,
   MockServices,
@@ -40,6 +40,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
   keyDeriver: KeyDeriver
   wallet: Wallet
   server: StorageServer
+  monitor: Monitor
 }> {
   try {
     if (!SERVER_PRIVATE_KEY) {
@@ -107,8 +108,21 @@ async function setupWalletStorageAndMonitor(): Promise<{
 
     // Initialize wallet components
     let services
+    let monopts
     if(chain === "mock") {
       services = new MockServices(knex)
+      await services.initialize()
+      monopts = {
+        chain,
+        services,
+        storage,
+        chaintracks: services.tracker,
+        msecsWaitPerMerkleProofServiceReq: 500,
+        taskRunWaitMsecs: 5000,
+        abandonedMsecs: 1000 * 60 * 5,
+        unprovenAttemptsLimitTest: 10,
+        unprovenAttemptsLimitMain: 144,
+      }
     } else {
       const servOpts = Services.createDefaultOptions(chain)
       if (TAAL_API_KEY) {
@@ -116,18 +130,18 @@ async function setupWalletStorageAndMonitor(): Promise<{
         servOpts.taalApiKey = TAAL_API_KEY
       }
       services = new Services(servOpts)
+      monopts = Monitor.createDefaultWalletMonitorOptions(
+        chain,
+        storage,
+        services
+      )
     }
     const keyDeriver = new KeyDeriver(rootKey)
 
-    const monopts = Monitor.createDefaultWalletMonitorOptions(
-      chain,
-      storage,
-      services
-    )
     const monitor = new Monitor(monopts)
     monitor.addDefaultTasks()
 
-    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor })
+    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor, lookupResolver: new LookupResolver({ networkPreset: 'local' })})
 
     // Set up server options
     const serverOptions: WalletStorageServerOptions = {
@@ -149,7 +163,8 @@ async function setupWalletStorageAndMonitor(): Promise<{
       settings,
       keyDeriver,
       wallet,
-      server
+      server,
+      monitor,
     }
   } catch (error) {
     console.error('Error setting up Wallet Storage and Monitor:', error)
@@ -166,6 +181,9 @@ async function setupWalletStorageAndMonitor(): Promise<{
 
     context.server.start()
     console.log('wallet-toolbox StorageServer started')
+
+    await context.monitor.startTasks()
+    console.log('wallet-toolbox Monitor started')
 
     // Conditionally start nginx
     if (ENABLE_NGINX === 'true') {
