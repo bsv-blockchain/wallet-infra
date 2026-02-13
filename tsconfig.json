@@ -3,6 +3,7 @@
     "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "sourceMap": true,
     "outDir": "out",
     "allowJs": true,
@@ -17,7 +18,7 @@
     "composite": true,
     "noImplicitOverride": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "package.json"],
   "exclude": ["node_modules", "jest.config.ts"],
   "references": []
 }
