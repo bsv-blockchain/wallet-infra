@@ -109,7 +109,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     // Initialize wallet components
     let services
     let monopts
-    if(chain === "mock") {
+    if (chain === "mock") {
       services = new MockServices(knex)
       await services.initialize()
       monopts = {
