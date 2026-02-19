@@ -176,7 +176,10 @@ async function setupWalletStorageAndMonitor(): Promise<{
 ;(async () => {
   try {
     const context = await setupWalletStorageAndMonitor()
-    console.log('wallet-toolbox v' + packageJson.dependencies['@bsv/wallet-toolbox'])
+    console.log(
+      'wallet-toolbox v' +
+        String(packageJson.dependencies['@bsv/wallet-toolbox']).replace(/^[~^]/, '')
+    )
     console.log(JSON.stringify(context.settings, null, 2))
 
     context.server.start()
