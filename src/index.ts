@@ -83,7 +83,15 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const knex = makeKnex(knexConfig)
 
     // Select chain from BSV_NETWORK: "main", "test", "teratest", or "mock" (defaults to "test")
-    const chain = BSV_NETWORK as "main" | "test" | "teratest" | "mock"
+    const allowedChains = ['main', 'test', 'teratest', 'mock'] as const
+    let chain: (typeof allowedChains)[number] = 'test'
+    if (typeof BSV_NETWORK === 'string' && allowedChains.includes(BSV_NETWORK as any)) {
+      chain = BSV_NETWORK as (typeof allowedChains)[number]
+    } else if (BSV_NETWORK !== 'test') {
+      console.warn(
+        `Invalid BSV_NETWORK value "${BSV_NETWORK}" provided. Falling back to "test".`
+      )
+    }
 
     // Initialize storage components
     const rootKey = PrivateKey.fromHex(SERVER_PRIVATE_KEY)
