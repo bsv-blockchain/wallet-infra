@@ -149,7 +149,8 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const monitor = new Monitor(monopts)
     monitor.addDefaultTasks()
 
-    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor, lookupResolver: new LookupResolver({ networkPreset: 'local' })})
+    const networkPresetForLookupResolver = chain === 'mock' ? 'local' : chain
+    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor, lookupResolver: new LookupResolver({ networkPreset: networkPresetForLookupResolver })})
 
     // Set up server options
     const serverOptions: WalletStorageServerOptions = {
