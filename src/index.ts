@@ -82,7 +82,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     }
     const knex = makeKnex(knexConfig)
 
-    // use testnet unless BSV_NETWORK env variable is set to exactly "main"
+    // Select chain from BSV_NETWORK: "main", "test", "teratest", or "mock" (defaults to "test")
     const chain = BSV_NETWORK as "main" | "test" | "teratest" | "mock"
 
     // Initialize storage components
