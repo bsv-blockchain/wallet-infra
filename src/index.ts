@@ -85,7 +85,10 @@ async function setupWalletStorageAndMonitor(): Promise<{
     // Select chain from BSV_NETWORK: "main", "test", "teratest", or "mock" (defaults to "test")
     const allowedChains = ['main', 'test', 'teratest', 'mock'] as const
     let chain: (typeof allowedChains)[number] = 'test'
-    if (typeof BSV_NETWORK === 'string' && allowedChains.includes(BSV_NETWORK as any)) {
+    if (
+      typeof BSV_NETWORK === 'string' &&
+      allowedChains.includes(BSV_NETWORK as any)
+    ) {
       chain = BSV_NETWORK as (typeof allowedChains)[number]
     } else if (BSV_NETWORK !== 'test') {
       console.warn(
@@ -117,7 +120,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
     // Initialize wallet components
     let services
     let monopts
-    if (chain === "mock") {
+    if (chain === 'mock') {
       services = new MockServices(knex)
       await services.initialize()
       monopts = {
@@ -129,7 +132,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
         taskRunWaitMsecs: 5000,
         abandonedMsecs: 1000 * 60 * 5,
         unprovenAttemptsLimitTest: 10,
-        unprovenAttemptsLimitMain: 144,
+        unprovenAttemptsLimitMain: 144
       }
     } else {
       const servOpts = Services.createDefaultOptions(chain)
@@ -149,8 +152,28 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const monitor = new Monitor(monopts)
     monitor.addDefaultTasks()
 
-    const networkPresetForLookupResolver = chain === 'mock' ? 'local' : chain
-    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor, lookupResolver: new LookupResolver({ networkPreset: networkPresetForLookupResolver })})
+    let networkPresetForLookupResolver: 'local' | 'mainnet' | 'testnet' =
+      'local'
+    switch (chain) {
+      case 'main':
+        networkPresetForLookupResolver = 'mainnet'
+        break
+      case 'test':
+        networkPresetForLookupResolver = 'testnet'
+        break
+      default:
+        break
+    }
+    const wallet = new Wallet({
+      chain,
+      keyDeriver,
+      storage,
+      services,
+      monitor,
+      lookupResolver: new LookupResolver({
+        networkPreset: networkPresetForLookupResolver
+      })
+    })
 
     // Set up server options
     const serverOptions: WalletStorageServerOptions = {
@@ -173,7 +196,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
       keyDeriver,
       wallet,
       server,
-      monitor,
+      monitor
     }
   } catch (error) {
     console.error('Error setting up Wallet Storage and Monitor:', error)
@@ -187,7 +210,10 @@ async function setupWalletStorageAndMonitor(): Promise<{
     const context = await setupWalletStorageAndMonitor()
     console.log(
       'wallet-toolbox v' +
-        String(packageJson.dependencies['@bsv/wallet-toolbox']).replace(/^[~^]/, '')
+        String(packageJson.dependencies['@bsv/wallet-toolbox']).replace(
+          /^[~^]/,
+          ''
+        )
     )
     console.log(JSON.stringify(context.settings, null, 2))
 
