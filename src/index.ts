@@ -1,6 +1,7 @@
-import { PrivateKey, KeyDeriver } from '@bsv/sdk'
+import { PrivateKey, KeyDeriver, LookupResolver } from '@bsv/sdk'
 import {
   Services,
+  MockServices,
   StorageKnex,
   TableSettings,
   WalletStorageManager,
@@ -11,6 +12,7 @@ import {
 } from '@bsv/wallet-toolbox'
 import { Knex, knex as makeKnex } from 'knex'
 import { spawn } from 'child_process'
+import packageJson from '../package.json'
 
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -38,6 +40,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
   keyDeriver: KeyDeriver
   wallet: Wallet
   server: StorageServer
+  monitor: Monitor
 }> {
   try {
     if (!SERVER_PRIVATE_KEY) {
@@ -79,8 +82,19 @@ async function setupWalletStorageAndMonitor(): Promise<{
     }
     const knex = makeKnex(knexConfig)
 
-    // use testnet unless BSV_NETWORK env variable is set to exactly "main"
-    const chain = BSV_NETWORK !== 'main' ? 'test' : 'main'
+    // Select chain from BSV_NETWORK: "main", "test", "teratest", or "mock" (defaults to "test")
+    const allowedChains = ['main', 'test', 'teratest', 'mock'] as const
+    let chain: (typeof allowedChains)[number] = 'test'
+    if (
+      typeof BSV_NETWORK === 'string' &&
+      allowedChains.includes(BSV_NETWORK as any)
+    ) {
+      chain = BSV_NETWORK as (typeof allowedChains)[number]
+    } else if (BSV_NETWORK !== 'test') {
+      console.warn(
+        `Invalid BSV_NETWORK value "${BSV_NETWORK}" provided. Falling back to "test".`
+      )
+    }
 
     // Initialize storage components
     const rootKey = PrivateKey.fromHex(SERVER_PRIVATE_KEY)
@@ -104,23 +118,62 @@ async function setupWalletStorageAndMonitor(): Promise<{
     await storage.makeAvailable()
 
     // Initialize wallet components
-    const servOpts = Services.createDefaultOptions(chain)
-    if (TAAL_API_KEY) {
-      servOpts.arcConfig.apiKey = TAAL_API_KEY
-      servOpts.taalApiKey = TAAL_API_KEY
+    let services
+    let monopts
+    if (chain === 'mock') {
+      services = new MockServices(knex)
+      await services.initialize()
+      monopts = {
+        chain,
+        services,
+        storage,
+        chaintracks: services.tracker,
+        msecsWaitPerMerkleProofServiceReq: 500,
+        taskRunWaitMsecs: 5000,
+        abandonedMsecs: 1000 * 60 * 5,
+        unprovenAttemptsLimitTest: 10,
+        unprovenAttemptsLimitMain: 144
+      }
+    } else {
+      const servOpts = Services.createDefaultOptions(chain)
+      if (TAAL_API_KEY) {
+        servOpts.arcConfig.apiKey = TAAL_API_KEY
+        servOpts.taalApiKey = TAAL_API_KEY
+      }
+      services = new Services(servOpts)
+      monopts = Monitor.createDefaultWalletMonitorOptions(
+        chain,
+        storage,
+        services
+      )
     }
-    const services = new Services(servOpts)
     const keyDeriver = new KeyDeriver(rootKey)
 
-    const monopts = Monitor.createDefaultWalletMonitorOptions(
-      chain,
-      storage,
-      services
-    )
     const monitor = new Monitor(monopts)
     monitor.addDefaultTasks()
 
-    const wallet = new Wallet({ chain, keyDeriver, storage, services, monitor })
+    let networkPresetForLookupResolver: 'local' | 'mainnet' | 'testnet' =
+      'local'
+    switch (chain) {
+      case 'main':
+        networkPresetForLookupResolver = 'mainnet'
+        break
+      case 'test':
+        networkPresetForLookupResolver = 'testnet'
+        break
+      default:
+        break
+    }
+    const wallet = new Wallet({
+      chain,
+      keyDeriver,
+      storage,
+      services,
+      monitor,
+      lookupResolver: new LookupResolver({
+        networkPreset: networkPresetForLookupResolver
+      })
+    })
 
     // Set up server options
     const serverOptions: WalletStorageServerOptions = {
@@ -142,7 +195,8 @@ async function setupWalletStorageAndMonitor(): Promise<{
       settings,
       keyDeriver,
       wallet,
-      server
+      server,
+      monitor
     }
   } catch (error) {
     console.error('Error setting up Wallet Storage and Monitor:', error)
@@ -154,11 +208,20 @@ async function setupWalletStorageAndMonitor(): Promise<{
 ;(async () => {
   try {
     const context = await setupWalletStorageAndMonitor()
-    console.log('wallet-toolbox StorageServer v1.3.30')
+    console.log(
+      'wallet-toolbox v' +
+        String(packageJson.dependencies['@bsv/wallet-toolbox']).replace(
+          /^[~^]/,
+          ''
+        )
+    )
     console.log(JSON.stringify(context.settings, null, 2))
 
     context.server.start()
     console.log('wallet-toolbox StorageServer started')
+
+    await context.monitor.startTasks()
+    console.log('wallet-toolbox Monitor started')
 
     // Conditionally start nginx
     if (ENABLE_NGINX === 'true') {
