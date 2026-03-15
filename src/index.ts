@@ -11,7 +11,7 @@ import {
   Monitor
 } from '@bsv/wallet-toolbox'
 import { Knex, knex as makeKnex } from 'knex'
-import { spawn } from 'child_process'
+import { spawn } from 'node:child_process'
 import packageJson from '../package.json'
 
 import * as dotenv from 'dotenv'
@@ -205,7 +205,7 @@ async function setupWalletStorageAndMonitor(): Promise<{
 }
 
 // Main function to start the server
-;(async () => {
+async function main(): Promise<void> {
   try {
     const context = await setupWalletStorageAndMonitor()
     console.log(
@@ -232,4 +232,6 @@ async function setupWalletStorageAndMonitor(): Promise<{
   } catch (error) {
     console.error('Error starting server:', error)
   }
-})()
+}
+
+main()

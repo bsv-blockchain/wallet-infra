@@ -27,6 +27,7 @@ spec:
       labels:
         app: mysql
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: mysql
         image: mysql:8
@@ -48,9 +49,11 @@ spec:
           requests:
             memory: "512Mi"
             cpu: "250m"
+            ephemeral-storage: "1Gi"
           limits:
             memory: "1Gi"
             cpu: "500m"
+            ephemeral-storage: "2Gi"
         livenessProbe:
           exec:
             command: ["mysqladmin", "ping", "-h", "localhost"]
