@@ -31,9 +31,10 @@ spec:
       labels:
         app: wallet-infra
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: wallet-infra
-        image: your-registry/wallet-infra:latest # Replace with your container registry path
+        image: your-registry/wallet-infra:2.0.1 # Replace with your container registry path and version
         ports:
         - containerPort: 8080
         envFrom:
@@ -45,9 +46,11 @@ spec:
           requests:
             cpu: 200m
             memory: 256Mi
+            ephemeral-storage: "1Gi"
           limits:
             cpu: 500m
             memory: 512Mi
+            ephemeral-storage: "2Gi"
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

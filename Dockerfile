@@ -13,6 +13,11 @@ COPY package.json .
 COPY src/ src/
 RUN npm i
 COPY tsconfig.json .
-RUN npm i knex typescript -g
-RUN npm run build
+RUN npm i knex typescript -g && \
+    npm run build
+
+# Run as non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
 CMD [ "node", "out/src/index.js"]

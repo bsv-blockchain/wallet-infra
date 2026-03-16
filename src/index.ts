@@ -11,8 +11,8 @@ import {
   Monitor
 } from '@bsv/wallet-toolbox'
 import { Knex, knex as makeKnex } from 'knex'
-import { spawn } from 'child_process'
-import packageJson from '../package.json'
+import { spawn } from 'node:child_process'
+import packageJson from '../package.json' with { type: 'json' }
 
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -204,32 +204,30 @@ async function setupWalletStorageAndMonitor(): Promise<{
   }
 }
 
-// Main function to start the server
-;(async () => {
-  try {
-    const context = await setupWalletStorageAndMonitor()
-    console.log(
-      'wallet-toolbox v' +
-        String(packageJson.dependencies['@bsv/wallet-toolbox']).replace(
-          /^[~^]/,
-          ''
-        )
-    )
-    console.log(JSON.stringify(context.settings, null, 2))
+// Start the server
+try {
+  const context = await setupWalletStorageAndMonitor()
+  console.log(
+    'wallet-toolbox v' +
+      String(packageJson.dependencies['@bsv/wallet-toolbox']).replace(
+        /^[~^]/,
+        ''
+      )
+  )
+  console.log(JSON.stringify(context.settings, null, 2))
 
-    context.server.start()
-    console.log('wallet-toolbox StorageServer started')
+  context.server.start()
+  console.log('wallet-toolbox StorageServer started')
 
-    await context.monitor.startTasks()
-    console.log('wallet-toolbox Monitor started')
+  await context.monitor.startTasks()
+  console.log('wallet-toolbox Monitor started')
 
-    // Conditionally start nginx
-    if (ENABLE_NGINX === 'true') {
-      console.log('Spawning nginx...')
-      spawn('nginx', [], { stdio: ['inherit', 'inherit', 'inherit'] })
-      console.log('nginx is up!')
-    }
-  } catch (error) {
-    console.error('Error starting server:', error)
+  // Conditionally start nginx
+  if (ENABLE_NGINX === 'true') {
+    console.log('Spawning nginx...')
+    spawn('nginx', [], { stdio: ['inherit', 'inherit', 'inherit'] })
+    console.log('nginx is up!')
   }
-})()
+} catch (error) {
+  console.error('Error starting server:', error)
+}
