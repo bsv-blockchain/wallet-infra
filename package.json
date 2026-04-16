@@ -1,6 +1,6 @@
 {
   "name": "wallet-infra",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "type": "module",
   "description": "UTXO Management Server",
   "author": "BSV Blockchain Association",
