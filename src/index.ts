@@ -10,7 +10,9 @@ import {
   Wallet,
   Monitor
 } from '@bsv/wallet-toolbox'
-import { Knex, knex as makeKnex } from 'knex'
+import knexPkg from 'knex'
+const { knex: makeKnex } = knexPkg
+import type { Knex } from 'knex'
 import { spawn } from 'node:child_process'
 import packageJson from '../package.json' with { type: 'json' }
 
