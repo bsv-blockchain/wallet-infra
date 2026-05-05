@@ -1,5 +1,9 @@
 # Wallet Infra - UTXO Management Server
 
+> **⚠️ This repository is being archived.**
+>
+> Development has moved to the [ts-stack monorepo](https://github.com/bsv-blockchain/ts-stack/tree/main/infrastructure%20components/wallet-infra). Open issues will be migrated there. This repository will be archived in the coming days — please open new issues and PRs in the monorepo going forward.
+
 This repository serves as a reference implementation for building and deploying BSV Wallet Infrastructure. It contains the configuration and code necessary to build and run a wallet storage server (also referred to as a “UTXO Management Server”). The server securely stores and manages UTXOs, providing a reliable backend for BSV wallet clients, all while never accessing user-held keys.
 
 Built on the [wallet-toolbox](https://github.com/bsv-blockchain/wallet-toolbox), this implementation empowers developers with extensive customization options for authentication, monetization, and database management to name a few.
